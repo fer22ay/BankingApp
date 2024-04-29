@@ -1,5 +1,6 @@
 package com.yambrosio.bankingapp.di
 
+import com.yambrosio.bankingapp.data.remote.ApiClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,11 +14,11 @@ import javax.inject.Singleton
 
 @Module
 @InstallIn(SingletonComponent::class)
-object AppModule {
+object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideOkHttpClient() = OkHttpClient.Builder()
+    fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
         .protocols(listOf(Protocol.HTTP_1_1))
         .readTimeout(100, TimeUnit.SECONDS)
         .connectTimeout(100, TimeUnit.SECONDS)
@@ -27,9 +28,15 @@ object AppModule {
     @Provides
     fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("https://run.mocky.io/")
+            .baseUrl("http://localhost:8080")
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
+    }
+
+    @Singleton
+    @Provides
+    fun provideApiClient(retrofit: Retrofit): ApiClient {
+        return retrofit.create(ApiClient::class.java)
     }
 }

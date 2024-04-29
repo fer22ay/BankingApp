@@ -1,4 +1,3 @@
 package com.yambrosio.bankingapp.data.remote.response
 
-class UserResponse {
-}
+data class LoginResponse(val id: Long = 0)

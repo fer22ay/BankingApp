@@ -1,4 +1,7 @@
 package com.yambrosio.bankingapp.domain.auth.register
 
-class AddUserUseCase {
+import javax.inject.Inject
+
+class AddUserUseCase @Inject constructor() {
+
 }

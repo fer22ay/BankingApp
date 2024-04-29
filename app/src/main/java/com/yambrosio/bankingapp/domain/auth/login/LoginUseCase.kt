@@ -1,4 +1,7 @@
 package com.yambrosio.bankingapp.domain.auth.login
 
-class LoginUseCase {
+import javax.inject.Inject
+
+class LoginUseCase @Inject constructor() {
+
 }

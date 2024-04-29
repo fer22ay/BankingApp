@@ -13,7 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
-import com.yambrosio.bankingapp.ui.home.HomeScreen
+import androidx.navigation.compose.rememberNavController
+import com.yambrosio.bankingapp.ui.navigation.SetupNavGraph
 import com.yambrosio.bankingapp.ui.theme.BankingAppTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -21,7 +22,6 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         enableEdgeToEdge()
         setContent {
             BankingAppTheme {
@@ -30,10 +30,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    HomeScreen()
+                    Content()
                 }
             }
         }
+    }
+
+    @Composable
+    fun Content() {
+        val navController = rememberNavController()
+        SetupNavGraph(navController = navController)
     }
 
     @Composable
