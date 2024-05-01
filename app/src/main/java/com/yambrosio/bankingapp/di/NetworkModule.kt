@@ -1,10 +1,13 @@
 package com.yambrosio.bankingapp.di
 
+import com.yambrosio.bankingapp.BuildConfig
 import com.yambrosio.bankingapp.data.remote.ApiClient
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.Dispatchers
 import okhttp3.OkHttpClient
 import okhttp3.Protocol
 import retrofit2.Retrofit
@@ -17,6 +20,12 @@ import javax.inject.Singleton
 object NetworkModule {
 
     @Provides
+    fun provideBaseUrl() = BuildConfig.API_DEV_BASE_URL
+
+    @Provides
+    fun provideIODispatcher(): CoroutineDispatcher = Dispatchers.IO
+
+    @Provides
     @Singleton
     fun provideOkHttpClient(): OkHttpClient = OkHttpClient.Builder()
         .protocols(listOf(Protocol.HTTP_1_1))
@@ -26,9 +35,9 @@ object NetworkModule {
 
     @Singleton
     @Provides
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(okHttpClient: OkHttpClient, baseURL: String): Retrofit {
         return Retrofit.Builder()
-            .baseUrl("http://localhost:8080")
+            .baseUrl(baseURL)
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
