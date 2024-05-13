@@ -13,7 +13,7 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import com.yambrosio.bankingapp.data.model.BottomNavigationItem
+import com.yambrosio.bankingapp.domain.model.BottomNavigationItem
 
 val items: List<BottomNavigationItem> = listOf(
     BottomNavigationItem(

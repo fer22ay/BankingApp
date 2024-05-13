@@ -1,4 +1,4 @@
-package com.yambrosio.bankingapp.data.model
+package com.yambrosio.bankingapp.domain.model
 
 import androidx.compose.ui.graphics.Brush
 

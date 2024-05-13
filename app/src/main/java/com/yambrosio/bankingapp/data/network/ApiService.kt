@@ -1,7 +1,10 @@
 package com.yambrosio.bankingapp.data.network
 
 import com.yambrosio.bankingapp.data.remote.ApiClient
+import com.yambrosio.bankingapp.data.remote.request.LoginRequest
+import com.yambrosio.bankingapp.data.remote.request.UserRequest
 import com.yambrosio.bankingapp.data.remote.response.LoginResponse
+import com.yambrosio.bankingapp.data.remote.response.UserDetailResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,9 +15,22 @@ class ApiService @Inject constructor(
     private val apiClient: ApiClient,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) {
-    suspend fun doLogin(username: String, password: String): Response<LoginResponse> {
+    suspend fun doLogin(loginRequest: LoginRequest): Response<LoginResponse> {
         return withContext(dispatcher) {
-            apiClient.doLogin(username, password)
+            apiClient.doLogin(loginRequest)
         }
     }
+
+    suspend fun register(userRequest: UserRequest): Response<UserRequest?> {
+        return withContext(dispatcher) {
+            apiClient.createUser(userRequest)
+        }
+    }
+
+    suspend fun getIUserById(id: Long): Response<UserDetailResponse?> {
+        return withContext(dispatcher) {
+            apiClient.getUserById(id)
+        }
+    }
+
 }

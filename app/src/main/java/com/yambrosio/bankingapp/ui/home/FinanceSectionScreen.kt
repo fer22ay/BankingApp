@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.yambrosio.bankingapp.data.model.Finance
+import com.yambrosio.bankingapp.domain.model.Finance
 import com.yambrosio.bankingapp.ui.theme.BlueStart
 import com.yambrosio.bankingapp.ui.theme.GreenStart
 import com.yambrosio.bankingapp.ui.theme.OrangeStart

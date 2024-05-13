@@ -15,7 +15,10 @@ fun SetupNavGraph(navController: NavHostController, loginViewModel: LoginViewMod
             SplashScreen(navController = navController)
         }
         composable(route = Screen.Login.route) {
-            LoginScreen(loginViewModel = loginViewModel)
+            LoginScreen(navController = navController, loginViewModel = loginViewModel)
+        }
+        composable(route = Screen.Home.route) {
+            HomeScreen()
         }
     }
 }

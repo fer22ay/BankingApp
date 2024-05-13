@@ -19,13 +19,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -45,30 +46,44 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavController
 import com.yambrosio.bankingapp.R
+import com.yambrosio.bankingapp.ui.loading.ProgressScreen
+import com.yambrosio.bankingapp.ui.navigation.Screen
 
 @Composable
-fun LoginScreen(loginViewModel: LoginViewModel) {
+fun LoginScreen(
+    navController: NavController,
+    loginViewModel: LoginViewModel
+) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
 
-        val isLoading: Boolean by loginViewModel.isLoginEnable.observeAsState(initial = false)
+        val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = false)
+        val isLoginSuccess: Boolean by loginViewModel.isLoginSuccess.observeAsState(initial = false)
+        val isLoginError: Boolean by loginViewModel.isLoginError.observeAsState(initial = false)
+        var showDialog by remember { mutableStateOf(true) }
+
         if (isLoading) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.Center),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                CircularProgressIndicator()
-            }
+            ProgressScreen()
         } else {
             Header(Modifier.align(Alignment.TopEnd))
             Body(Modifier.align(Alignment.Center), loginViewModel)
             Footer(Modifier.align(Alignment.BottomCenter))
+
+            if (isLoginError) {
+                AlertDialogShow(
+                    onDismissRequest = { showDialog = false },
+                    onConfirmation = { showDialog = false },
+                    dialogTitle = "Error",
+                    dialogText = loginViewModel.state.value.error,
+                    show = showDialog
+                )
+            } else if (isLoginSuccess)
+                navController.navigate(Screen.Home.route)
         }
     }
 }
@@ -97,19 +112,21 @@ fun Header(modifier: Modifier) {
 @Composable
 fun Body(modifier: Modifier, loginViewModel: LoginViewModel) {
 
-    val email: String by loginViewModel.email.observeAsState(initial = "")
+    val username: String by loginViewModel.username.observeAsState(initial = "")
     val password: String by loginViewModel.password.observeAsState(initial = "")
     val isLoginEnable by loginViewModel.isLoginEnable.observeAsState(initial = false)
 
     Column(modifier = modifier) {
         ImageLogo(Modifier.align(Alignment.CenterHorizontally))
         Spacer(modifier = Modifier.size(16.dp))
-        Email(email) {
+
+        Username(username) {
             loginViewModel.onLoginChanged(it, password = password)
         }
         Spacer(modifier = Modifier.size(8.dp))
+
         Password(password) {
-            loginViewModel.onLoginChanged(email = email, it)
+            loginViewModel.onLoginChanged(username = username, it)
         }
         Spacer(modifier = Modifier.size(8.dp))
         ForgotPassword(Modifier.align(Alignment.End))
@@ -128,15 +145,15 @@ fun ImageLogo(modifier: Modifier) {
 }
 
 @Composable
-fun Email(email: String, onTextChanged: (String) -> Unit) {
+fun Username(username: String, onTextChanged: (String) -> Unit) {
     TextField(
-        value = email,
+        value = username,
         onValueChange = { onTextChanged(it) },
         modifier = Modifier.fillMaxWidth(),
         placeholder = { Text(text = "Username") },
         maxLines = 1,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -192,12 +209,14 @@ fun ForgotPassword(modifier: Modifier) {
 @Composable
 fun LoginButton(loginEnable: Boolean, loginViewModel: LoginViewModel) {
     Button(
-        onClick = { loginViewModel.onLoginSelected() },
+        onClick = {
+            loginViewModel.onLoginSelected()
+        },
         enabled = loginEnable,
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
-            containerColor = Color(0xFF8BC34A),
-            disabledContainerColor = Color(0xFF4CAF50),
+            containerColor = Color(0xFF4CAF50),
+            disabledContainerColor = Color(0xFF8BC34A),
             contentColor = Color.White,
             disabledContentColor = Color.White
         )
@@ -231,6 +250,38 @@ fun SignUp() {
             fontSize = 12.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF4EA8E9)
+        )
+    }
+}
+
+@Composable
+fun AlertDialogShow(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String?,
+    dialogText: String?,
+    show: Boolean
+) {
+    if (show) {
+        AlertDialog(
+            title = {
+                Text(text = dialogTitle.toString())
+            },
+            text = {
+                Text(text = dialogText.toString())
+            },
+            onDismissRequest = {
+                onDismissRequest()
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        onConfirmation()
+                    }
+                ) {
+                    Text("Ok")
+                }
+            }
         )
     }
 }
