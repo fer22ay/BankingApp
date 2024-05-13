@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
@@ -37,10 +39,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusDirection
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -65,7 +70,6 @@ fun LoginScreen(
         val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = false)
         val isLoginSuccess: Boolean by loginViewModel.isLoginSuccess.observeAsState(initial = false)
         val isLoginError: Boolean by loginViewModel.isLoginError.observeAsState(initial = false)
-        var showDialog by remember { mutableStateOf(true) }
 
         if (isLoading) {
             ProgressScreen()
@@ -76,11 +80,11 @@ fun LoginScreen(
 
             if (isLoginError) {
                 AlertDialogShow(
-                    onDismissRequest = { showDialog = false },
-                    onConfirmation = { showDialog = false },
+                    onDismissRequest = { loginViewModel.onDismissDialog() },
+                    onConfirmation = { loginViewModel.onConfirmButtonDialog() },
                     dialogTitle = "Error",
                     dialogText = loginViewModel.state.value.error,
-                    show = showDialog
+                    show = loginViewModel.isDialogShown.value
                 )
             } else if (isLoginSuccess)
                 navController.navigate(Screen.Home.route)
@@ -146,6 +150,7 @@ fun ImageLogo(modifier: Modifier) {
 
 @Composable
 fun Username(username: String, onTextChanged: (String) -> Unit) {
+    val focusManager = LocalFocusManager.current
     TextField(
         value = username,
         onValueChange = { onTextChanged(it) },
@@ -153,7 +158,15 @@ fun Username(username: String, onTextChanged: (String) -> Unit) {
         placeholder = { Text(text = "Username") },
         maxLines = 1,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Text,
+            imeAction = ImeAction.Done
+        ),
+        keyboardActions = KeyboardActions(onDone = {
+            focusManager.moveFocus(
+                FocusDirection.Next
+            )
+        }),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -173,7 +186,9 @@ fun Password(password: String, onTextChanged: (String) -> Unit) {
         placeholder = { Text(text = "Password") },
         maxLines = 1,
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password
+        ),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -213,6 +228,7 @@ fun LoginButton(loginEnable: Boolean, loginViewModel: LoginViewModel) {
             loginViewModel.onLoginSelected()
         },
         enabled = loginEnable,
+        shape = RoundedCornerShape(32),
         modifier = Modifier.fillMaxWidth(),
         colors = ButtonDefaults.buttonColors(
             containerColor = Color(0xFF4CAF50),
@@ -221,7 +237,10 @@ fun LoginButton(loginEnable: Boolean, loginViewModel: LoginViewModel) {
             disabledContentColor = Color.White
         )
     ) {
-        Text(text = "Log In")
+        Text(
+            text = "Log In",
+            fontSize = 18.sp
+        )
     }
 }
 

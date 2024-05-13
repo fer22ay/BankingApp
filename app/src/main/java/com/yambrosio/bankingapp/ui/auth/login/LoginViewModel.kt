@@ -42,6 +42,9 @@ class LoginViewModel @Inject constructor(
     private val _isLoginError = MutableLiveData<Boolean>()
     val isLoginError: LiveData<Boolean> = _isLoginError
 
+    private val _isDialogShown = mutableStateOf(false)
+    val isDialogShown: State<Boolean> = _isDialogShown
+
     private fun doLogin(username: String, password: String) {
         loginUseCase(username.uppercase(), password.uppercase()).onEach { result ->
             when (result) {
@@ -56,12 +59,14 @@ class LoginViewModel @Inject constructor(
                         LoginState(error = result.message ?: "An unexpected error occurred")
                     _isLoading.value = false
                     _isLoginError.value = true
+                    _isDialogShown.value = true
                 }
 
                 is Resource.Loading -> {
                     _isLoading.value = true
                     _isLoginSuccess.value = false
                     _isLoginError.value = false
+                    _isDialogShown.value = false
                 }
             }
         }.launchIn(viewModelScope)
@@ -76,10 +81,19 @@ class LoginViewModel @Inject constructor(
     private fun enableLogin(username: String, password: String) =
         username.length > 4 && password.length > 6
 
+    fun onConfirmButtonDialog() {
+        _isDialogShown.value = false
+    }
+
+    fun onDismissDialog() {
+        _isDialogShown.value = false
+    }
+
     fun onLoginSelected() {
         viewModelScope.launch {
             doLogin(_username.value!!, _password.value!!)
             _isLoginError.value = false
+            _isDialogShown.value = true
         }
     }
 }
