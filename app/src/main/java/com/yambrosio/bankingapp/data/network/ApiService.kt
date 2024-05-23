@@ -3,7 +3,9 @@ package com.yambrosio.bankingapp.data.network
 import com.yambrosio.bankingapp.data.remote.ApiClient
 import com.yambrosio.bankingapp.data.remote.request.LoginRequest
 import com.yambrosio.bankingapp.data.remote.request.UserRequest
+import com.yambrosio.bankingapp.data.remote.response.CompanyResponse
 import com.yambrosio.bankingapp.data.remote.response.LoginResponse
+import com.yambrosio.bankingapp.data.remote.response.TypeEmployeeResponse
 import com.yambrosio.bankingapp.data.remote.response.UserDetailResponse
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +23,7 @@ class ApiService @Inject constructor(
         }
     }
 
-    suspend fun register(userRequest: UserRequest): Response<UserRequest?> {
+    suspend fun register(userRequest: UserRequest): Response<UserRequest> {
         return withContext(dispatcher) {
             apiClient.createUser(userRequest)
         }
@@ -30,6 +32,18 @@ class ApiService @Inject constructor(
     suspend fun getIUserById(id: Long): Response<UserDetailResponse?> {
         return withContext(dispatcher) {
             apiClient.getUserById(id)
+        }
+    }
+
+    suspend fun getCompanies(token: String): Response<List<CompanyResponse>> {
+        return withContext(dispatcher) {
+            apiClient.listCompanies(token)
+        }
+    }
+
+    suspend fun getTypeEmployees(token: String): Response<List<TypeEmployeeResponse>> {
+        return withContext(dispatcher) {
+            apiClient.listTypeEmployees(token)
         }
     }
 

@@ -1,6 +1,7 @@
-package com.yambrosio.bankingapp.ui.auth.login
+package com.yambrosio.bankingapp.ui.auth.login.components
 
 import android.app.Activity
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -24,6 +25,7 @@ import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -53,7 +55,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.yambrosio.bankingapp.R
-import com.yambrosio.bankingapp.ui.loading.ProgressScreen
+import com.yambrosio.bankingapp.ui.auth.login.LoginViewModel
 import com.yambrosio.bankingapp.ui.navigation.Screen
 
 @Composable
@@ -72,11 +74,18 @@ fun LoginScreen(
         val isLoginError: Boolean by loginViewModel.isLoginError.observeAsState(initial = false)
 
         if (isLoading) {
-            ProgressScreen()
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
         } else {
             Header(Modifier.align(Alignment.TopEnd))
             Body(Modifier.align(Alignment.Center), loginViewModel)
-            Footer(Modifier.align(Alignment.BottomCenter))
+            Footer(Modifier.align(Alignment.BottomCenter), navController = navController)
 
             if (isLoginError) {
                 AlertDialogShow(
@@ -214,7 +223,7 @@ fun Password(password: String, onTextChanged: (String) -> Unit) {
 fun ForgotPassword(modifier: Modifier) {
     Text(
         text = "Forgot password?",
-        fontSize = 12.sp,
+        fontSize = 14.sp,
         fontWeight = FontWeight.Bold,
         color = Color(0xFF4EA8E9),
         modifier = modifier
@@ -245,7 +254,7 @@ fun LoginButton(loginEnable: Boolean, loginViewModel: LoginViewModel) {
 }
 
 @Composable
-fun Footer(modifier: Modifier) {
+fun Footer(modifier: Modifier, navController: NavController) {
     Column(modifier = modifier.fillMaxWidth()) {
         HorizontalDivider(
             Modifier
@@ -254,19 +263,24 @@ fun Footer(modifier: Modifier) {
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.size(24.dp))
-        SignUp()
+        SignUp(navController = navController)
         Spacer(modifier = Modifier.size(60.dp))
     }
 }
 
 @Composable
-fun SignUp() {
+fun SignUp(navController: NavController) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-        Text(text = "Don't have a account?", fontSize = 12.sp, color = Color(0xFFB5B5B5))
+        Text(text = "Don't have a account?", fontSize = 16.sp, color = Color(0xFFB5B5B5))
         Text(
             text = "Sign up.",
-            Modifier.padding(horizontal = 8.dp),
-            fontSize = 12.sp,
+            Modifier
+                .padding(horizontal = 8.dp)
+                .clickable {
+                    Log.i("SignUp", "ExpandableTextExample: Detect Click")
+                    navController.navigate(Screen.Register.route)
+                },
+            fontSize = 16.sp,
             fontWeight = FontWeight.Bold,
             color = Color(0xFF4EA8E9)
         )

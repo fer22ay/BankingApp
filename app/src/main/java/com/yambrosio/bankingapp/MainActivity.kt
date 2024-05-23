@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.toArgb
 import androidx.navigation.compose.rememberNavController
 import com.yambrosio.bankingapp.ui.auth.login.LoginViewModel
+import com.yambrosio.bankingapp.ui.auth.register.RegisterViewModel
 import com.yambrosio.bankingapp.ui.navigation.SetupNavGraph
 import com.yambrosio.bankingapp.ui.theme.BankingAppTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,6 +25,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
     private val loginViewModel: LoginViewModel by viewModels()
+    private val registerViewModel: RegisterViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -35,16 +37,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Content(loginViewModel = loginViewModel)
+                    Content(loginViewModel = loginViewModel, registerViewModel = registerViewModel)
                 }
             }
         }
     }
 
     @Composable
-    fun Content(loginViewModel: LoginViewModel) {
+    fun Content(loginViewModel: LoginViewModel, registerViewModel: RegisterViewModel) {
         val navController = rememberNavController()
-        SetupNavGraph(navController = navController, loginViewModel = loginViewModel)
+        SetupNavGraph(navController = navController, loginViewModel = loginViewModel, registerViewModel = registerViewModel)
     }
 
     @Composable

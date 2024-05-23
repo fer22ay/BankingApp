@@ -6,6 +6,6 @@ import com.yambrosio.bankingapp.domain.model.UserModel
 
 interface LoginRepository {
     suspend fun doLogin(username: String, password: String): LoginModel
-    suspend fun register(user: UserModel): UserModel?
+    suspend fun register(user: UserModel): UserModel
     suspend fun getUserById(id: Long): UserDetailModel?
 }
