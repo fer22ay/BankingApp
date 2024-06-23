@@ -2,7 +2,6 @@ package com.yambrosio.bankingapp.domain.auth.register
 
 import com.yambrosio.bankingapp.core.NetworkHelper
 import com.yambrosio.bankingapp.core.Resource
-import com.yambrosio.bankingapp.domain.model.LoginModel
 import com.yambrosio.bankingapp.domain.model.UserModel
 import com.yambrosio.bankingapp.domain.repository.LoginRepository
 import kotlinx.coroutines.flow.Flow
@@ -16,8 +15,6 @@ class AddUserUseCase @Inject constructor(
     private val repository: LoginRepository
 ) {
     operator fun invoke(
-        typeEmployee: Long,
-        company: Long,
         name: String,
         username: String,
         password: String,
@@ -26,8 +23,7 @@ class AddUserUseCase @Inject constructor(
         try {
             emit(Resource.Loading())
             if (networkHelper.isNetworkConnected()) {
-                val registerResponse = repository.register(user = UserModel(idTypeEmployee = typeEmployee, idCompany = company,
-                    name = name, username = username, password = password, email = email))
+                val registerResponse = repository.register(user = UserModel(name = name, username = username, password = password, email = email))
                 emit(Resource.Success(registerResponse))
             } else
                 emit(Resource.Error("No internet connection"))

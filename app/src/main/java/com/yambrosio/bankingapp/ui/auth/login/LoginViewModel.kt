@@ -30,43 +30,34 @@ class LoginViewModel @Inject constructor(
     private val _isLoginEnable = MutableLiveData<Boolean>()
     val isLoginEnable: LiveData<Boolean> = _isLoginEnable
 
-    private val _isLoading = MutableLiveData<Boolean>()
-    val isLoading: LiveData<Boolean> = _isLoading
-
     private val _state = mutableStateOf(LoginState())
     val state: State<LoginState> = _state
-
-    private val _isLoginSuccess = MutableLiveData<Boolean>()
-    val isLoginSuccess: LiveData<Boolean> = _isLoginSuccess
-
-    private val _isLoginError = MutableLiveData<Boolean>()
-    val isLoginError: LiveData<Boolean> = _isLoginError
-
-    private val _isDialogShown = mutableStateOf(false)
-    val isDialogShown: State<Boolean> = _isDialogShown
 
     private fun doLogin(username: String, password: String) {
         loginUseCase(username.uppercase(), password.uppercase()).onEach { result ->
             when (result) {
                 is Resource.Success -> {
-                    _state.value = LoginState(login = result.data)
-                    _isLoading.value = false
-                    _isLoginSuccess.value = true
+                    _state.value = _state.value.copy(
+                        login = result.data,
+                        isSuccess = true,
+                        isError = false,
+                        loading = false
+                    )
                 }
 
                 is Resource.Error -> {
                     _state.value =
-                        LoginState(error = result.message ?: "An unexpected error occurred")
-                    _isLoading.value = false
-                    _isLoginError.value = true
-                    _isDialogShown.value = true
+                        _state.value.copy(
+                            error = result.message ?: "An unexpected error occurred",
+                            isSuccess = false,
+                            isError = true,
+                            loading = false
+                        )
                 }
 
                 is Resource.Loading -> {
-                    _isLoading.value = true
-                    _isLoginSuccess.value = false
-                    _isLoginError.value = false
-                    _isDialogShown.value = false
+                    _state.value =
+                        _state.value.copy(isSuccess = false, isError = false, loading = true)
                 }
             }
         }.launchIn(viewModelScope)
@@ -81,19 +72,14 @@ class LoginViewModel @Inject constructor(
     private fun enableLogin(username: String, password: String) =
         username.length > 4 && password.length > 6
 
-    fun onConfirmButtonDialog() {
-        _isDialogShown.value = false
-    }
-
     fun onDismissDialog() {
-        _isDialogShown.value = false
+        _state.value = _state.value.copy(isError = false)
     }
 
     fun onLoginSelected() {
+        _state.value = _state.value.copy(isError = false, loading = true)
         viewModelScope.launch {
             doLogin(_username.value!!, _password.value!!)
-            _isLoginError.value = false
-            _isDialogShown.value = true
         }
     }
 }

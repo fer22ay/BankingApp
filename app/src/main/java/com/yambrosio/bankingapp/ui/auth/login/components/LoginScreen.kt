@@ -22,6 +22,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.PersonOutline
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,9 +31,10 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -53,27 +56,22 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.yambrosio.bankingapp.R
 import com.yambrosio.bankingapp.ui.auth.login.LoginViewModel
-import com.yambrosio.bankingapp.ui.navigation.Screen
 
 @Composable
 fun LoginScreen(
-    navController: NavController,
-    loginViewModel: LoginViewModel
+    onLogin: () -> Unit,
+    onHome: () -> Unit,
+    loginViewModel: LoginViewModel = hiltViewModel()
 ) {
     Box(
         modifier = Modifier
             .fillMaxSize()
             .padding(8.dp)
     ) {
-
-        val isLoading: Boolean by loginViewModel.isLoading.observeAsState(initial = false)
-        val isLoginSuccess: Boolean by loginViewModel.isLoginSuccess.observeAsState(initial = false)
-        val isLoginError: Boolean by loginViewModel.isLoginError.observeAsState(initial = false)
-
-        if (isLoading) {
+        if (loginViewModel.state.value.loading) {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -85,25 +83,25 @@ fun LoginScreen(
         } else {
             Header(Modifier.align(Alignment.TopEnd))
             Body(Modifier.align(Alignment.Center), loginViewModel)
-            Footer(Modifier.align(Alignment.BottomCenter), navController = navController)
+            Footer(Modifier.align(Alignment.BottomCenter)) { onLogin() }
 
-            if (isLoginError) {
+            if (loginViewModel.state.value.isError) {
                 AlertDialogShow(
                     onDismissRequest = { loginViewModel.onDismissDialog() },
-                    onConfirmation = { loginViewModel.onConfirmButtonDialog() },
+                    onConfirmation = { loginViewModel.onDismissDialog() },
                     dialogTitle = "Error",
                     dialogText = loginViewModel.state.value.error,
-                    show = loginViewModel.isDialogShown.value
+                    show = loginViewModel.state.value.isError
                 )
-            } else if (isLoginSuccess)
-                navController.navigate(Screen.Home.route)
+            } else if (loginViewModel.state.value.isSuccess)
+                onHome()
         }
     }
 }
 
 @Composable
 fun Header(modifier: Modifier) {
-    var activity = LocalContext.current as Activity
+    val activity = LocalContext.current as Activity
     Column(
         modifier = modifier.fillMaxSize(),
         verticalArrangement = Arrangement.Top,
@@ -138,9 +136,11 @@ fun Body(modifier: Modifier, loginViewModel: LoginViewModel) {
         }
         Spacer(modifier = Modifier.size(8.dp))
 
-        Password(password) {
+        Password(password, onTextChanged = {
             loginViewModel.onLoginChanged(username = username, it)
-        }
+        }, doLogin = {
+            loginViewModel.onLoginSelected()
+        }, isFormValid = isLoginEnable)
         Spacer(modifier = Modifier.size(8.dp))
         ForgotPassword(Modifier.align(Alignment.End))
         Spacer(modifier = Modifier.size(16.dp))
@@ -160,10 +160,14 @@ fun ImageLogo(modifier: Modifier) {
 @Composable
 fun Username(username: String, onTextChanged: (String) -> Unit) {
     val focusManager = LocalFocusManager.current
-    TextField(
+    OutlinedTextField(
         value = username,
         onValueChange = { onTextChanged(it) },
         modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        leadingIcon = {
+            Icon(imageVector = Icons.Outlined.PersonOutline, contentDescription = "username")
+        },
         placeholder = { Text(text = "Username") },
         maxLines = 1,
         singleLine = true,
@@ -184,20 +188,37 @@ fun Username(username: String, onTextChanged: (String) -> Unit) {
 }
 
 @Composable
-fun Password(password: String, onTextChanged: (String) -> Unit) {
+fun Password(
+    password: String,
+    onTextChanged: (String) -> Unit,
+    doLogin: () -> Unit,
+    isFormValid: Boolean
+) {
     var passwordVisibility by remember {
         mutableStateOf(false)
     }
-    TextField(
+
+    val focusManager = LocalFocusManager.current
+    OutlinedTextField(
         value = password,
         onValueChange = { onTextChanged(it) },
         modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        leadingIcon = {
+            Icon(imageVector = Icons.Outlined.Lock, contentDescription = "Password")
+        },
         placeholder = { Text(text = "Password") },
         maxLines = 1,
         singleLine = true,
         keyboardOptions = KeyboardOptions(
-            keyboardType = KeyboardType.Password
+            keyboardType = KeyboardType.Password,
+            imeAction = ImeAction.Done
         ),
+        keyboardActions = KeyboardActions(onDone = {
+            focusManager.clearFocus()
+            if (isFormValid)
+                doLogin()
+        }),
         colors = TextFieldDefaults.colors(
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent
@@ -254,7 +275,7 @@ fun LoginButton(loginEnable: Boolean, loginViewModel: LoginViewModel) {
 }
 
 @Composable
-fun Footer(modifier: Modifier, navController: NavController) {
+fun Footer(modifier: Modifier, onLogin: () -> Unit) {
     Column(modifier = modifier.fillMaxWidth()) {
         HorizontalDivider(
             Modifier
@@ -263,13 +284,13 @@ fun Footer(modifier: Modifier, navController: NavController) {
                 .fillMaxWidth()
         )
         Spacer(modifier = Modifier.size(24.dp))
-        SignUp(navController = navController)
+        SignUp(onLogin = { onLogin() })
         Spacer(modifier = Modifier.size(60.dp))
     }
 }
 
 @Composable
-fun SignUp(navController: NavController) {
+fun SignUp(onLogin: () -> Unit) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
         Text(text = "Don't have a account?", fontSize = 16.sp, color = Color(0xFFB5B5B5))
         Text(
@@ -278,7 +299,7 @@ fun SignUp(navController: NavController) {
                 .padding(horizontal = 8.dp)
                 .clickable {
                     Log.i("SignUp", "ExpandableTextExample: Detect Click")
-                    navController.navigate(Screen.Register.route)
+                    onLogin()
                 },
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold,

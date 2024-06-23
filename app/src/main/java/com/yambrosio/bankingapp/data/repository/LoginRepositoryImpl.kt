@@ -3,7 +3,7 @@ package com.yambrosio.bankingapp.data.repository
 import com.yambrosio.bankingapp.data.local.pref.AuthPreferences
 import com.yambrosio.bankingapp.data.network.ApiService
 import com.yambrosio.bankingapp.data.remote.request.LoginRequest
-import com.yambrosio.bankingapp.data.remote.request.otUserModel
+import com.yambrosio.bankingapp.data.remote.request.toUserModel
 import com.yambrosio.bankingapp.data.remote.response.toLogin
 import com.yambrosio.bankingapp.data.remote.response.toUserDetail
 import com.yambrosio.bankingapp.domain.model.LoginModel
@@ -42,7 +42,7 @@ class LoginRepositoryImpl @Inject constructor(
             val response = api.register(user.toUserRequest())
             return if (response.isSuccessful) {
                 if (response.body() != null) {
-                    response.body()!!.otUserModel()
+                    response.body()!!.toUserModel()
                 } else {
                     throw Exception("Error ${response.errorBody()?.string()}")
                 }

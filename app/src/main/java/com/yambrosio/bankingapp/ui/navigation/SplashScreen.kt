@@ -9,7 +9,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.navigation.NavHostController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -17,7 +16,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.yambrosio.bankingapp.R
 
 @Composable
-fun SplashScreen(navController: NavHostController) {
+fun SplashScreen(onHome: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -33,7 +32,7 @@ fun SplashScreen(navController: NavHostController) {
             progress = { logoAnimationState.progress }
         )
         if (logoAnimationState.isAtEnd && logoAnimationState.isPlaying) {
-            navController.navigate(Screen.Login.route)
+            onHome()
         }
     }
 }

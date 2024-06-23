@@ -21,3 +21,8 @@ val OrangeEnd = Color(0xFFFDA35F)
 
 val GreenStart = Color(0xFF11B114)
 val GreenEnd = Color(0xFF52DB59)
+
+val AccentColor = Color(0xFFC58BF2)
+val Primary = Color(0xFF2A3FD)
+val BgColor = Color(0xFFF7F8F8)
+val TextColor = Color(0xFF1D1617)
